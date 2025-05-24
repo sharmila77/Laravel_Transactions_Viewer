@@ -65,20 +65,27 @@ class PipedriveController extends Controller
         ]);
 
         $invoices = $charges = [];
-        if ($response->successful()) {
+        $data = '';
+        if ($response->status() == 429) {
+            // Rate limit exceeded
+            $retryAfter = $response->header('Retry-After', 60);
+            $data = '<div class="alert alert-warning">Rate limit exceeded. Please try again after ' . $retryAfter . ' seconds.</div>';
+        } elseif ($response->successful()) {
             $stripeData = $response->json();
             $invoices = $stripeData['invoices'] ?? [];
             $charges = $stripeData['charges'] ?? [];
-        }
 
-        if ($tab === 'invoices') {
-            $data = view('pipedrive.partials.invoices_card', [
-                'invoices' => $invoices,
-            ])->render();
+            if ($tab === 'invoices') {
+                $data = view('pipedrive.partials.invoices_card', [
+                    'invoices' => $invoices,
+                ])->render();
+            } else {
+                $data = view('pipedrive.partials.payments_card', [
+                    'payments' => $charges,
+                ])->render();
+            }
         } else {
-            $data = view('pipedrive.partials.payments_card', [
-                'payments' => $charges,
-            ])->render();
+            $data = '<p>Error fetching data.</p>';
         }
 
         return response()
