@@ -1,0 +1,24 @@
+{
+  "name": "Internal Transactions Viewer",
+  "description": "View customer transactions inside Pipedrive from your internal app.",
+  "icon_url": "https://octopus-app-3hac5.ondigitalocean.app/logo.png",
+  "base_url": "https://octopus-app-3hac5.ondigitalocean.app",
+  "oauth": {
+    "client_id": "9eabfadf1e996846",
+    "client_secret": "c293348bd3bee411d6fb743d66f3ef02a2fafa2c",
+    "redirect_uris": [
+      "https://octopus-app-3hac5.ondigitalocean.app/oauth/callback"
+    ],
+    "scopes": ["contacts:read"]
+  },
+  "custom_ui_extensions": {
+    "custom_panels": [
+      {
+        "title": "Transactions",
+        "icon": "credit-card",
+        "target": "person",
+        "url": "/pipedrive/panel"
+      }
+    ]
+  }
+}
