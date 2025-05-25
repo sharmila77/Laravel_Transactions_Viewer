@@ -16,35 +16,42 @@ class PipedriveController extends Controller
 
     
     public function handleCallback(Request $request)
-    {
-        $code = $request->query('code');
+{
+    $code = $request->query('code');
 
-        if (!$code) {
-            return response('Missing authorization code', 400);
-        }
-
-        $response = Http::asForm()->post('https://oauth.pipedrive.com/oauth/token', [
-            'grant_type' => 'authorization_code',
-            'code' => $code,
-            'redirect_uri' => env('PIPEDRIVE_REDIRECT_URI'),
-            'client_id' => env('PIPEDRIVE_CLIENT_ID'),
-            'client_secret' => env('PIPEDRIVE_CLIENT_SECRET'),
-        ]);
-
-        if ($response->failed()) {
-            return response()->json([
-                'error' => 'OAuth failed',
-                'details' => $response->json(),
-            ], 500);
-        }
-
-        $data = $response->json();
-
-        return response()->json([
-            'message' => '✅ Successfully connected to Pipedrive',
-            'token_data' => $data,
-        ]);
+    if (!$code) {
+        return response('Missing authorization code', 400);
     }
+
+    $response = Http::asForm()->post('https://oauth.pipedrive.com/oauth/token', [
+        'grant_type' => 'authorization_code',
+        'code' => $code,
+        'redirect_uri' => env('PIPEDRIVE_REDIRECT_URI'),
+        'client_id' => env('PIPEDRIVE_CLIENT_ID'),
+        'client_secret' => env('PIPEDRIVE_CLIENT_SECRET'),
+    ]);
+
+    if ($response->failed()) {
+        return response()->json([
+            'error' => 'OAuth failed',
+            'details' => $response->json(),
+        ], 500);
+    }
+
+    $data = $response->json();
+
+    // Redirect to Pipedrive contact list or contact view
+    $domain = $data['api_domain'] ?? null;
+    if ($domain) {
+        return redirect()->away($domain . '/persons/list');
+    }
+
+    return response()->json([
+        'message' => '✅ Successfully connected to Pipedrive',
+        'token_data' => $data,
+    ]);
+}
+
 
     public function showPanel(Request $request)
     {
